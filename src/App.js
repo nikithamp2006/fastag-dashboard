@@ -4,6 +4,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tool
 
 function App() {
   const [data, setData] = useState([]);
+  const [darkMode, setDarkMode] = useState(false);
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
   const [result, setResult] = useState(null);
@@ -15,6 +16,12 @@ function App() {
   const totalRevenue = Math.round(cleanData.reduce((sum, row) => sum + row.Debit_Amount, 0));
   const avgToll = Math.round(totalRevenue / totalTransactions) || 0;
   const roundTripPct = Math.round((cleanData.filter(row => row.Round_Trip_Flag === "Yes").length / totalTransactions) * 100) || 0;
+  const theme = {
+  bg: darkMode ? "#1a1a2e" : "#f3f4f6",
+  card: darkMode ? "#16213e" : "white",
+  text: darkMode ? "white" : "black",
+  subtext: darkMode ? "#aaa" : "#666",
+};
   
 
   useEffect(() => {
@@ -89,8 +96,26 @@ function calculate() {
   });
 }
 return (
-  <div style={{ padding: "24px", background: "#f3f4f6", minHeight: "100vh" }}>
-    <h1 style={{ marginBottom: "24px" }}>FASTag Dashboard</h1>
+  <div style={{ padding: "24px", background: theme.bg, minHeight: "100vh" }}>
+    
+    {/* Header with dark mode toggle */}
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+      <h1 style={{ margin: 0, color: theme.text }}>FASTag Dashboard</h1>
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        style={{
+          padding: "8px 20px",
+          borderRadius: "20px",
+          border: "none",
+          cursor: "pointer",
+          background: darkMode ? "white" : "#1a1a2e",
+          color: darkMode ? "#1a1a2e" : "white",
+          fontWeight: "bold"
+        }}
+      >
+        {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+      </button>
+    </div>
 
     {/* KPI Cards */}
     <div style={{ display: "flex", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
@@ -101,14 +126,14 @@ return (
         { label: "Round Trips", value: `${roundTripPct}%`, color: "#ef4444" },
       ].map((kpi) => (
         <div key={kpi.label} style={{
-          background: "white",
+          background: theme.card,
           padding: "20px",
           borderRadius: "12px",
           flex: 1,
           minWidth: "150px",
           borderTop: `4px solid ${kpi.color}`
         }}>
-          <p style={{ margin: 0, color: "#666", fontSize: "14px" }}>{kpi.label}</p>
+          <p style={{ margin: 0, color: theme.subtext, fontSize: "14px" }}>{kpi.label}</p>
           <h2 style={{ margin: "8px 0 0 0", color: kpi.color }}>{kpi.value}</h2>
         </div>
       ))}
@@ -118,12 +143,12 @@ return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
 
       {/* Chart 1 - Transactions by Hour */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
-        <h2>Transactions by Hour</h2>
+      <div style={{ background: theme.card, padding: "20px", borderRadius: "12px" }}>
+        <h2 style={{ color: theme.text }}>Transactions by Hour</h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={byHour}>
-            <XAxis dataKey="hour" />
-            <YAxis />
+            <XAxis dataKey="hour" stroke={theme.subtext} />
+            <YAxis stroke={theme.subtext} />
             <Tooltip />
             <Bar dataKey="count" fill="#6366f1" />
           </BarChart>
@@ -131,12 +156,12 @@ return (
       </div>
 
       {/* Chart 2 - Monthly Revenue Trend */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
-        <h2>Monthly Revenue Trend</h2>
+      <div style={{ background: theme.card, padding: "20px", borderRadius: "12px" }}>
+        <h2 style={{ color: theme.text }}>Monthly Revenue Trend</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={byMonth}>
-            <XAxis dataKey="month" />
-            <YAxis />
+            <XAxis dataKey="month" stroke={theme.subtext} />
+            <YAxis stroke={theme.subtext} />
             <Tooltip />
             <Line type="monotone" dataKey="total" stroke="#6366f1" strokeWidth={2} dot={true} />
           </LineChart>
@@ -144,8 +169,8 @@ return (
       </div>
 
       {/* Chart 3 - Spend Tier */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
-        <h2>Transactions by Spend Tier</h2>
+      <div style={{ background: theme.card, padding: "20px", borderRadius: "12px" }}>
+        <h2 style={{ color: theme.text }}>Transactions by Spend Tier</h2>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -168,12 +193,12 @@ return (
       </div>
 
       {/* Chart 4 - Top 10 Plazas */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
-        <h2>Top 10 Plazas by Revenue</h2>
+      <div style={{ background: theme.card, padding: "20px", borderRadius: "12px" }}>
+        <h2 style={{ color: theme.text }}>Top 10 Plazas by Revenue</h2>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={byPlaza} layout="vertical" margin={{ left: 150 }}>
-            <XAxis type="number" />
-            <YAxis type="category" dataKey="plaza" width={150} />
+            <XAxis type="number" stroke={theme.subtext} />
+            <YAxis type="category" dataKey="plaza" width={150} stroke={theme.subtext} />
             <Tooltip />
             <Bar dataKey="total" fill="#22c55e" />
           </BarChart>
@@ -181,20 +206,19 @@ return (
       </div>
 
     </div>
-    {/* End of grid */}
 
-    {/* Round Trip Calculator - full width below grid */}
-    <div style={{ background: "white", padding: "20px", borderRadius: "12px", marginTop: "24px" }}>
-      <h2>Round Trip Calculator</h2>
-      <p style={{ color: "#666" }}>Estimates based on average toll amounts from your data</p>
+    {/* Round Trip Calculator */}
+    <div style={{ background: theme.card, padding: "20px", borderRadius: "12px", marginTop: "24px" }}>
+      <h2 style={{ color: theme.text }}>Round Trip Calculator</h2>
+      <p style={{ color: theme.subtext }}>Estimates based on average toll amounts from your data</p>
 
       <div style={{ display: "flex", gap: "16px", marginTop: "16px", flexWrap: "wrap" }}>
         <div>
-          <label style={{ display: "block", marginBottom: "6px", fontWeight: "bold" }}>Source Plaza</label>
+          <label style={{ display: "block", marginBottom: "6px", fontWeight: "bold", color: theme.text }}>Source Plaza</label>
           <select
             value={source}
             onChange={e => setSource(e.target.value)}
-            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ddd", minWidth: "200px" }}
+            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ddd", minWidth: "200px", background: theme.card, color: theme.text }}
           >
             <option value="">Select source...</option>
             {plazaNames.map(p => <option key={p} value={p}>{p}</option>)}
@@ -202,11 +226,11 @@ return (
         </div>
 
         <div>
-          <label style={{ display: "block", marginBottom: "6px", fontWeight: "bold" }}>Destination Plaza</label>
+          <label style={{ display: "block", marginBottom: "6px", fontWeight: "bold", color: theme.text }}>Destination Plaza</label>
           <select
             value={destination}
             onChange={e => setDestination(e.target.value)}
-            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ddd", minWidth: "200px" }}
+            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ddd", minWidth: "200px", background: theme.card, color: theme.text }}
           >
             <option value="">Select destination...</option>
             {plazaNames.map(p => <option key={p} value={p}>{p}</option>)}
@@ -225,12 +249,12 @@ return (
 
       {result && (
         <div style={{ marginTop: "24px", display: "flex", gap: "16px" }}>
-          <div style={{ background: "#f0f9ff", padding: "16px", borderRadius: "8px", flex: 1 }}>
-            <p style={{ color: "#666", margin: 0 }}>One-way estimate</p>
+          <div style={{ background: darkMode ? "#0f3460" : "#f0f9ff", padding: "16px", borderRadius: "8px", flex: 1 }}>
+            <p style={{ color: theme.subtext, margin: 0 }}>One-way estimate</p>
             <h2 style={{ margin: "4px 0", color: "#6366f1" }}>₹{result.oneway}</h2>
           </div>
-          <div style={{ background: "#f0fdf4", padding: "16px", borderRadius: "8px", flex: 1 }}>
-            <p style={{ color: "#666", margin: 0 }}>Round trip estimate</p>
+          <div style={{ background: darkMode ? "#0f3d2e" : "#f0fdf4", padding: "16px", borderRadius: "8px", flex: 1 }}>
+            <p style={{ color: theme.subtext, margin: 0 }}>Round trip estimate</p>
             <h2 style={{ margin: "4px 0", color: "#22c55e" }}>₹{result.roundTrip}</h2>
           </div>
         </div>
